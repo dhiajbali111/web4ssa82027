@@ -1,0 +1,29 @@
+flowchart TB
+  WEB[Web] --> GW[API Gateway :8080]
+  MOB[Mobile candidats] --> GW
+  DESK[Desktop agences] --> GW
+
+  GW -->|sync REST JWT| C[ms-candidate]
+  GW -->|sync REST JWT| O[ms-offer]
+  GW -->|sync REST JWT| A[ms-application]
+  GW -->|sync REST JWT| I[ms-interview Node]
+  GW -->|sync REST JWT| N[ms-notification Python]
+
+  A -->|OpenFeign sync| C
+  A -->|OpenFeign sync| O
+  I -->|OpenFeign sync| A
+
+  A -->|async events| RQ[[RabbitMQ]]
+  O -->|async events| RQ
+  I -->|async events| RQ
+  C -->|async events| RQ
+  RQ -->|async consume| N
+
+  C --- DB1[(MySQL candidate_db)]
+  O --- DB2[(MySQL offer_db)]
+  A --- DB3[(PostgreSQL application_db)]
+  I --- DB4[(MongoDB interview_db)]
+
+  EU[Eureka :8761]
+  CS[Config Server :8888]
+  KC[Keycloak :8180]

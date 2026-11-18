@@ -1,0 +1,15 @@
+erDiagram
+  CANDIDATE ||--o| ADDRESS : "has (same DB FK)"
+  CANDIDATE {
+    BIGINT id PK
+    VARCHAR firstname
+    VARCHAR lastname
+    VARCHAR email UK
+    BIGINT address_id FK
+  }
+  ADDRESS {
+    BIGINT id PK
+    VARCHAR street
+    VARCHAR house_number
+    VARCHAR zip_code
+  }

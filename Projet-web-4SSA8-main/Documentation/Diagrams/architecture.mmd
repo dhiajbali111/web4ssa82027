@@ -1,0 +1,71 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '14px'}}}%%
+flowchart TB
+  subgraph CLIENT["Client"]
+    FE["Frontend Web/Mobile<br/>placeholder Validation 1"]
+  end
+
+  subgraph DOCKER["Docker Compose — Backend/"]
+    subgraph EDGE["Edge"]
+      GW["api-gateway :8080<br/>Spring Cloud Gateway"]
+      KC["Keycloak :8180<br/>OAuth2 / JWT"]
+    end
+
+    subgraph INFRA["Infrastructure"]
+      EU["eureka-server :8761<br/>Service Discovery"]
+      CS["config-server :8888<br/>Config native"]
+      RQ["RabbitMQ :5672<br/>UI :15672"]
+    end
+
+    subgraph MS["Microservices métier + avancé"]
+      C["ms-candidate :8081<br/>Aziz Mehrez"]
+      J["ms-job :8082<br/>Rayen Sboui"]
+      A["ms-application :8083<br/>Maryem Slatni"]
+      I["ms-interview :8084<br/>Ezzedine Zouiten"]
+      N["ms-notification :8085<br/>Dhia Jbali · Python"]
+    end
+
+    subgraph DATA["Databases — 1 per service"]
+      MYC[("MySQL candidate_db<br/>:3307")]
+      MYJ[("MySQL job_db<br/>:3308")]
+      PG[("PostgreSQL application_db<br/>:5433")]
+      MG[("MongoDB interview_db<br/>:27017")]
+    end
+  end
+
+  FE -->|"REST + JWT"| GW
+  FE -->|"login OIDC"| KC
+  GW -->|"JWKS / roles"| KC
+  GW -->|"lb REST Eureka"| C
+  GW -->|"lb REST"| J
+  GW -->|"lb REST"| A
+  GW -->|"lb REST"| I
+  GW -->|"REST"| N
+
+  C -.->|"register"| EU
+  J -.-> EU
+  A -.-> EU
+  I -.-> EU
+  GW -.-> EU
+
+  C -.->|"config"| CS
+  J -.-> CS
+  A -.-> CS
+  I -.-> CS
+  GW -.-> CS
+
+  C --- MYC
+  J --- MYJ
+  A --- PG
+  I --- MG
+
+  A -->|"OpenFeign sync"| C
+  A -->|"OpenFeign sync"| J
+  I -->|"OpenFeign sync"| A
+
+  A -->|"events async"| RQ
+  J -->|"events async"| RQ
+  I -->|"events async"| RQ
+  C -->|"events async"| RQ
+  RQ -->|"consume"| N
+
+  classDef legend fill:#f9f9f9,stroke:#333;

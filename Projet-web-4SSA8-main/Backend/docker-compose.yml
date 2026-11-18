@@ -1,0 +1,138 @@
+services:
+  mysql-candidate:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: candidate_db
+    ports: ["3307:3306"]
+    volumes: [mysql_candidate_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mysql-job:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: job_db
+    ports: ["3308:3306"]
+    volumes: [mysql_job_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres-application:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: application_db
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports: ["5433:5432"]
+    volumes: [postgres_application_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d application_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo-interview:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes: [mongo_interview_data:/data/db]
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports: ["5672:5672", "15672:15672"]
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.0
+    command: ["start-dev"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports: ["8180:8080"]
+
+  eureka-server:
+    build: ./eureka-server
+    ports: ["8761:8761"]
+    depends_on: [rabbitmq]
+
+  config-server:
+    build: ./config-server
+    ports: ["8888:8888"]
+    depends_on: [eureka-server]
+
+  api-gateway:
+    build: ./api-gateway
+    ports: ["8080:8080"]
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      NOTIFICATION_URI: http://ms-notification:8085
+    depends_on: [eureka-server, config-server, ms-notification]
+
+  ms-candidate:
+    build: ./ms-candidate
+    ports: ["8081:8081"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-candidate:3306/candidate_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_RABBITMQ_HOST: rabbitmq
+    depends_on: [mysql-candidate, eureka-server, config-server, rabbitmq]
+
+  ms-job:
+    build: ./ms-job
+    ports: ["8082:8082"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-job:3306/job_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_RABBITMQ_HOST: rabbitmq
+    depends_on: [mysql-job, eureka-server, config-server, rabbitmq]
+
+  ms-application:
+    build: ./ms-application
+    ports: ["8083:8083"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-application:5432/application_db
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: app
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_RABBITMQ_HOST: rabbitmq
+    depends_on: [postgres-application, eureka-server, config-server, rabbitmq]
+
+  ms-interview:
+    build: ./ms-interview
+    ports: ["8084:8084"]
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo-interview:27017/interview_db
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_RABBITMQ_HOST: rabbitmq
+    depends_on: [mongo-interview, eureka-server, config-server, rabbitmq]
+
+  ms-notification:
+    build: ./ms-notification
+    ports: ["8085:8085"]
+    environment:
+      RABBITMQ_HOST: rabbitmq
+    depends_on: [rabbitmq]
+
+volumes:
+  mysql_candidate_data:
+  mysql_job_data:
+  postgres_application_data:
+  mongo_interview_data:

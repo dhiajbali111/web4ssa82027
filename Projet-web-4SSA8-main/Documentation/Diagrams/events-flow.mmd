@@ -1,0 +1,13 @@
+flowchart LR
+  APP[ms-application]
+  JOB[ms-job]
+  INT[ms-interview]
+  RQ[[RabbitMQ]]
+  NOTIF[ms-notification]
+
+  APP -->|ApplicationCreated| RQ
+  APP -->|ApplicationStatusChanged| RQ
+  JOB -->|JobAvailabilityChanged| RQ
+  INT -->|InterviewScheduled| RQ
+  INT -->|InterviewCancelled| RQ
+  RQ --> NOTIF

@@ -1,0 +1,19 @@
+flowchart LR
+  KC[BC Keycloak IAM]
+  CAND[BC Identité candidat]
+  OFF[BC Offres]
+  APP[BC Candidature]
+  INT[BC Entretien]
+  NOTIF[BC Notification]
+
+  CAND -->|"Customer/Supplier Feign sync"| APP
+  OFF -->|"Customer/Supplier Feign sync"| APP
+  APP -->|"Customer/Supplier Feign sync"| INT
+  APP -->|"Published Language events"| NOTIF
+  INT -->|"Published Language events"| NOTIF
+  OFF -->|"Published Language events"| NOTIF
+  CAND -->|"Published Language CandidateDeleted"| NOTIF
+  KC -->|"Conformist JWT"| CAND
+  KC --> OFF
+  KC --> APP
+  KC --> INT

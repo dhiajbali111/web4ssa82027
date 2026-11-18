@@ -1,0 +1,15 @@
+erDiagram
+  CATEGORY ||--o{ JOB : "classifies (same DB FK)"
+  CATEGORY {
+    BIGINT id PK
+    VARCHAR name UK
+    VARCHAR description
+  }
+  JOB {
+    BIGINT id PK
+    VARCHAR name
+    VARCHAR description
+    BOOLEAN available
+    DATE date
+    BIGINT category_id FK
+  }

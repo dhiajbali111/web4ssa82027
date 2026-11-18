@@ -1,0 +1,22 @@
+flowchart LR
+  KC[BC Keycloak IAM]
+  CAND[BC Identité Candidat]
+  JOB[BC Catalogue Offres]
+  APP[BC Candidature]
+  INT[BC Entretien]
+  NOTIF[BC Notification]
+
+  CAND -->|"Customer/Supplier Feign sync"| APP
+  JOB -->|"Customer/Supplier Feign sync"| APP
+  APP -->|"Customer/Supplier Feign sync"| INT
+  APP -->|"Published Language events"| NOTIF
+  INT -->|"Published Language events"| NOTIF
+  JOB -->|"Published Language events"| NOTIF
+  CAND -->|"Published Language CandidateDeleted"| NOTIF
+  KC -->|"Conformist JWT"| CAND
+  KC --> JOB
+  KC --> APP
+  KC --> INT
+
+  %% Shared Kernel évité — pas de schéma ni lib métier partagés
+  %% ACL: DTO Feign + mapping events côté notification

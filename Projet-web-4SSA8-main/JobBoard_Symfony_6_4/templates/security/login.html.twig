@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login · JobBoard{% endblock %}
+
+{% block body %}
+<form class="panel" method="post">
+    <h1>Login</h1>
+    {% if error %}
+        <div class="flash danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+    <label>Email
+        <input name="_username" type="email" value="{{ last_username }}" required autocomplete="username">
+    </label>
+    <label>Password
+        <input name="_password" type="password" required autocomplete="current-password">
+    </label>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+    <button>Login</button>
+    <p>Demo passwords: <code>password</code></p>
+</form>
+{% endblock %}

@@ -1,0 +1,21 @@
+sequenceDiagram
+  actor User as Candidat
+  participant GW as api-gateway
+  participant APP as ms-application
+  participant CAND as ms-candidate
+  participant JOB as ms-job
+  participant RQ as RabbitMQ
+  participant NOTIF as ms-notification
+
+  User->>GW: POST /api/applications
+  GW->>APP: route lb://ms-application
+  APP->>CAND: Feign GET /api/candidates/{id}
+  CAND-->>APP: 200 Candidate
+  APP->>JOB: Feign GET /api/jobs/{id}
+  JOB-->>APP: 200 Job available=true
+  APP->>APP: persist Application
+  APP-->>GW: 201 Created
+  GW-->>User: 201
+  APP->>RQ: publish ApplicationCreated
+  RQ->>NOTIF: deliver event
+  NOTIF->>NOTIF: send email async

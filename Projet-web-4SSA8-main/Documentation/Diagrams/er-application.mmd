@@ -1,0 +1,9 @@
+erDiagram
+  APPLICATION {
+    BIGINT id PK
+    DATE application_date
+    VARCHAR motivation
+    VARCHAR status
+    BIGINT candidate_id "logical ref NO cross-DB FK"
+    BIGINT job_id "logical ref NO cross-DB FK"
+  }

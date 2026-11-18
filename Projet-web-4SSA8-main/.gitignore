@@ -1,0 +1,52 @@
+# Java / Maven
+**/target/
+**/.mvn/wrapper/*.jar
+*.class
+*.jar
+!**/gradle-wrapper.jar
+*.war
+hs_err_pid*
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+**/__pycache__/
+**/.venv/
+*.pyc
+
+# Node
+**/node_modules/
+
+# Symfony / PHP
+**/vendor/
+**/var/
+**/.phpunit.result.cache
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+**/.env.local
+**/keycloak-realm-export-with-secrets.json
+
+# Logs / temp
+*.log
+**/tmp/
+**/.DS_Store
+
+# Large / local DB
+**/*.db
+**/jobboard.db
+
+# Nested git metadata
+**/.git_symfony_backup/
+

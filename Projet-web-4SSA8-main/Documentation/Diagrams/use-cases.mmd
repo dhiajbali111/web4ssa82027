@@ -1,0 +1,21 @@
+flowchart LR
+  Cand((Candidat))
+  Rec((Recruteur))
+  Adm((Administrateur))
+  Notif((Système notification))
+
+  Cand --> UC1[Gérer profil US-01/02]
+  Cand --> UC2[Consulter offres US-03]
+  Cand --> UC3[Postuler US-04]
+  Cand --> UC4[Suivre candidatures US-05]
+  Cand --> UC5[Recevoir notifications US-06/07]
+
+  Rec --> UC6[Gérer offres US-08/09]
+  Rec --> UC7[Traiter candidatures US-10/11]
+  Rec --> UC8[Planifier entretiens US-12]
+
+  Adm --> UC9[Gérer catégories US-13]
+  Adm --> UC10[Sécuriser accès US-14]
+  Adm --> UC11[Superviser santé US-15]
+
+  Notif --> UC5
